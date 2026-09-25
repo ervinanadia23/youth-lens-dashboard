@@ -318,11 +318,13 @@ tab1, tab2, tab3 = st.tabs([
 ])
 
 color_map = {
-    "Digitally Excluded & Education Deprived": "#b91c1c",
-    "Employment Insecure": "#d97706",
-    "Moderate / No Dominant Domain": "#2563eb",
-    "Relatively Resilient": "#059669"
+    "Digitally Excluded & Education Deprived": "#f43f5e",
+    "Employment Insecure": "#f59e0b",
+    "Moderate / No Dominant Domain": "#8b5cf6",
+    "Relatively Resilient": "#10b981"
 }
+
+YVI_SCALE = ["#6366f1", "#a855f7", "#f43f5e"]
 
 # --- TAB 1: PERINGKAT YVI ---
 with tab1:
@@ -339,7 +341,7 @@ with tab1:
             y="Provinsi",
             orientation="h",
             color="YVI",
-            color_continuous_scale="Tealgrn",
+            color_continuous_scale=YVI_SCALE,
             hover_data={"Tipologi": True, "LISA_quadrant": True, "YVI": ":.2f"},
             height=max(500, len(df_rank) * 22)
         )
@@ -438,9 +440,9 @@ with tab3:
             y="Jumlah",
             color="Status LISA",
             color_discrete_map={
-                "High-High (hotspot rentan)": "#b91c1c",
-                "Low-Low (coldspot/aman)": "#059669",
-                "Low-High": "#ea580c",
+                "High-High (hotspot rentan)": "#f43f5e",
+                "Low-Low (coldspot/aman)": "#10b981",
+                "Low-High": "#f59e0b",
                 "Tidak signifikan": "#94a3b8"
             }
         )
