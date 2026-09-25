@@ -909,57 +909,48 @@ with tab3:
         # PETA
         # =============================================================
 
-        fig_map = px.choropleth(
-            filtered_df,
-            geojson=geojson_provinsi,
-            locations="Provinsi_Geo",
-            featureidkey="properties.PROVINSI",
-            color="YVI",
-            color_continuous_scale=YVI_SCALE,
-            range_color=(0, 100),
-            hover_name="Provinsi",
-            hover_data={
-                "Tipologi": True,
-                "LISA_quadrant": True,
-                "YVI": ":.2f",
-                "Provinsi_Geo": False
-            }
-        )
+        fig_map = px.choropleth_map(
+    filtered_df,
+    geojson=geojson_provinsi,
+    locations="Provinsi_Geo",
+    featureidkey="properties.PROVINSI",
+    color="YVI",
+    color_continuous_scale=YVI_SCALE,
+    range_color=(0, 100),
+    hover_name="Provinsi",
+    hover_data={
+        "Tipologi": True,
+        "LISA_quadrant": True,
+        "YVI": ":.2f",
+        "Provinsi_Geo": False
+    },
+    center={"lat": -2.5, "lon": 118},
+    zoom=3.5,
+    map_style="carto-positron",
+    opacity=0.75
+)
 
-        fig_map.update_geos(
-            visible=False,
-            showcountries=False,
-            showcoastlines=False,
-            showland=False,
-            showocean=False,
-            showlakes=False,
-            showframe=False,
-            bgcolor="rgba(0,0,0,0)",
-            projection_type="mercator",
-            lonaxis_range=[94, 142],
-            lataxis_range=[-12, 7]
-        )
+fig_map.update_layout(
+    margin=dict(l=0, r=0, t=10, b=0),
+    coloraxis_colorbar=dict(title="Skor YVI"),
+    height=500
+)
+
+st.plotly_chart(
+    fig_map,
+    width="stretch"
+)
 
         fig_map.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color=PLOT_FONT_COLOR),
-            margin=dict(
-                l=0,
-                r=0,
-                t=10,
-                b=0
-            ),
-            coloraxis_colorbar=dict(
-                title="Skor YVI"
-            ),
-            height=480
-        )
+    margin=dict(l=0, r=0, t=10, b=0),
+    coloraxis_colorbar=dict(title="Skor YVI"),
+    height=500
+)
 
-        st.plotly_chart(
-            fig_map,
-            width="stretch"
-        )
+st.plotly_chart(
+    fig_map,
+    width="stretch"
+)
 
 
         # =============================================================
