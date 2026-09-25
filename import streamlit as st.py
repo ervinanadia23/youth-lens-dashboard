@@ -1,4 +1,6 @@
 import os
+import json
+import urllib.request
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -190,6 +192,39 @@ try:
 except Exception as e:
     st.error(f"Gagal membaca file data: {e}")
     st.stop()
+
+# --- Peta batas wilayah 38 provinsi (untuk choropleth spasial) ---
+GEOJSON_URL = "https://raw.githubusercontent.com/denyherianto/indonesia-geojson-topojson-maps-with-38-provinces/main/GeoJSON/indonesia-38-provinces.geojson"
+
+# Beberapa nama provinsi di data sumber kadang berbeda penulisan dengan nama resmi di peta
+PROV_NAME_ALIAS = {
+    "DI Yogyakarta": "Daerah Istimewa Yogyakarta",
+    "DIY": "Daerah Istimewa Yogyakarta",
+    "Yogyakarta": "Daerah Istimewa Yogyakarta",
+    "Jakarta": "DKI Jakarta",
+    "DKI": "DKI Jakarta",
+    "Bangka Belitung": "Kepulauan Bangka Belitung",
+    "Kep. Bangka Belitung": "Kepulauan Bangka Belitung",
+    "Kepri": "Kepulauan Riau",
+    "Kep. Riau": "Kepulauan Riau",
+}
+
+def to_geo_name(nama_provinsi: str) -> str:
+    return PROV_NAME_ALIAS.get(nama_provinsi, nama_provinsi)
+
+@st.cache_data(show_spinner=False)
+def load_geojson():
+    with urllib.request.urlopen(GEOJSON_URL, timeout=15) as resp:
+        return json.load(resp)
+
+try:
+    geojson_provinsi = load_geojson()
+    geojson_ok = True
+except Exception:
+    geojson_provinsi = None
+    geojson_ok = False
+
+df["Provinsi_Geo"] = df["Provinsi"].apply(to_geo_name)
 
 def get_detailed_policy(prov, tipologi, cluster, lisa, yvi):
     if cluster == 1:
@@ -427,6 +462,44 @@ with tab2:
 with tab3:
     st.subheader("Autokorelasi Spasial Lokal (LISA) & Arah Intervensi Kebijakan")
     st.caption("Identifikasi aglomerasi spasial untuk memetakan penularan kerentanan antardaerah.")
+
+    st.markdown("##### Peta Sebaran Youth Vulnerability Index (YVI) Antarprovinsi")
+
+    if filtered_df.empty:
+        st.warning("Tidak ada provinsi yang memenuhi kriteria filter.")
+    elif not geojson_ok:
+        st.warning("Peta tidak dapat dimuat (gagal mengambil data batas wilayah). Coba refresh halaman.")
+    else:
+        fig_map = px.choropleth(
+            filtered_df,
+            geojson=geojson_provinsi,
+            locations="Provinsi_Geo",
+            featureidkey="properties.PROVINSI",
+            color="YVI",
+            color_continuous_scale=YVI_SCALE,
+            hover_name="Provinsi",
+            hover_data={"Tipologi": True, "LISA_quadrant": True, "YVI": ":.2f", "Provinsi_Geo": False}
+        )
+        fig_map.update_geos(fitbounds="locations", visible=False)
+        fig_map.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color=PLOT_FONT_COLOR),
+            margin=dict(l=0, r=0, t=10, b=0),
+            coloraxis_colorbar=dict(title="Skor YVI"),
+            height=520
+        )
+        st.plotly_chart(fig_map, width="stretch")
+
+        nama_teridentifikasi = {f["properties"]["PROVINSI"] for f in geojson_provinsi["features"]}
+        prov_tak_ketemu = sorted(set(filtered_df["Provinsi_Geo"]) - nama_teridentifikasi)
+        if prov_tak_ketemu:
+            st.caption(
+                "Catatan: provinsi berikut belum cocok dengan nama di batas wilayah peta, "
+                "jadi tidak tampil di peta (namun tetap tampil di chart lain): "
+                + ", ".join(prov_tak_ketemu)
+            )
+
+    st.markdown("---")
 
     col_lisa_chart, col_lisa_text = st.columns([5, 5])
 
