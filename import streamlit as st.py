@@ -12,10 +12,14 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-st.markdown("""
-<style>
 .stApp {
-    background: #f8fafc;
+    background:
+        radial-gradient(circle at 8% 15%, rgba(37,99,235,0.12) 0%, transparent 40%),
+        radial-gradient(circle at 92% 10%, rgba(16,185,129,0.10) 0%, transparent 38%),
+        radial-gradient(circle at 15% 90%, rgba(217,119,6,0.08) 0%, transparent 35%),
+        radial-gradient(circle at 90% 85%, rgba(139,92,246,0.10) 0%, transparent 40%),
+        linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%);
+    background-attachment: fixed;
     color: #1e293b;
 }
 [data-testid="stSidebar"] {
