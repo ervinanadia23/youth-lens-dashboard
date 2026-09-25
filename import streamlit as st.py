@@ -62,6 +62,7 @@ p, span, label, .stCaption, [data-testid="stCaptionContainer"] {
     padding: 16px 18px;
     box-shadow: 0 2px 10px rgba(15,23,42,0.06);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
+    min-height: 108px;
 }
 
 [data-testid="stMetric"]:hover {
@@ -72,10 +73,29 @@ p, span, label, .stCaption, [data-testid="stCaptionContainer"] {
 [data-testid="stMetricValue"] {
     color: #2563eb !important;
     font-weight: 700 !important;
+    font-size: 1.35rem !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    line-height: 1.25 !important;
+    word-break: break-word;
+}
+
+[data-testid="stMetricValue"] > div {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
 }
 
 [data-testid="stMetricLabel"] {
     color: #64748b !important;
+    white-space: normal !important;
+    overflow: visible !important;
+}
+
+[data-testid="stMetricDelta"] {
+    white-space: normal !important;
+    overflow: visible !important;
 }
 
 [data-testid="stContainer"], div[data-testid="stVerticalBlockBorderWrapper"] {
