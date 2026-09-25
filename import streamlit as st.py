@@ -196,6 +196,7 @@ except Exception as e:
     st.stop()
 
 # --- Peta batas wilayah 38 provinsi (untuk choropleth spasial) ---
+GEOJSON_LOCAL_PATH = "indonesia-38-provinces.geojson"
 GEOJSON_URL = "https://raw.githubusercontent.com/denyherianto/indonesia-geojson-topojson-maps-with-38-provinces/main/GeoJSON/indonesia-38-provinces.geojson"
 
 # Beberapa nama provinsi di data sumber kadang berbeda penulisan dengan nama resmi di peta
@@ -224,6 +225,10 @@ def _normalize_name(s: str) -> str:
 
 @st.cache_data(show_spinner=False)
 def load_geojson():
+    # Prioritaskan file lokal (kalau sudah diupload ke repo) supaya tidak tergantung internet saat demo
+    if os.path.exists(GEOJSON_LOCAL_PATH):
+        with open(GEOJSON_LOCAL_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
     with urllib.request.urlopen(GEOJSON_URL, timeout=15) as resp:
         return json.load(resp)
 
@@ -509,21 +514,38 @@ with tab3:
             featureidkey="properties.PROVINSI",
             color="YVI",
             color_continuous_scale=YVI_SCALE,
+            range_color=(0, 100),
             hover_name="Provinsi",
             hover_data={"Tipologi": True, "LISA_quadrant": True, "YVI": ":.2f", "Provinsi_Geo": False}
         )
-        fig_map.update_geos(fitbounds="locations", visible=False)
+        fig_map.update_geos(
+            visible=False,
+            showcountries=False,
+            showcoastlines=False,
+            showland=False,
+            showocean=False,
+            showlakes=False,
+            showframe=False,
+            bgcolor="rgba(0,0,0,0)",
+            projection_type="mercator",
+            lonaxis_range=[94, 142],
+            lataxis_range=[-12, 7]
+        )
         fig_map.update_layout(
             paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
             font=dict(color=PLOT_FONT_COLOR),
             margin=dict(l=0, r=0, t=10, b=0),
             coloraxis_colorbar=dict(title="Skor YVI"),
-            height=520
+            height=480
         )
         st.plotly_chart(fig_map, width="stretch")
 
         nama_teridentifikasi = {f["properties"]["PROVINSI"] for f in geojson_provinsi["features"]}
+        prov_cocok = [p for p in filtered_df["Provinsi_Geo"] if p in nama_teridentifikasi]
         prov_tak_ketemu = sorted(set(filtered_df["Provinsi_Geo"]) - nama_teridentifikasi)
+
+        st.caption(f"Berhasil dipetakan: {len(prov_cocok)} dari {len(filtered_df)} provinsi.")
         if prov_tak_ketemu:
             st.caption(
                 "Catatan: provinsi berikut belum cocok dengan nama di batas wilayah peta, "
