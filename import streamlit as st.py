@@ -896,8 +896,8 @@ with tab3:
             geojson=geojson_provinsi,
             locations="Provinsi_Geo",
             featureidkey="properties.PROVINSI",
-            color="YVI",
-            color_continuous_scale=YVI_SCALE,
+            color="Tipologi",
+            color_discrete_map=color_map,
             range_color=(0, 100),
             hover_name="Provinsi",
             hover_data={
