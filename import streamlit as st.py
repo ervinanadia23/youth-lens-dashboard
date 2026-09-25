@@ -1,6 +1,8 @@
 import os
 import json
+import re
 import urllib.request
+from difflib import get_close_matches
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -199,18 +201,26 @@ GEOJSON_URL = "https://raw.githubusercontent.com/denyherianto/indonesia-geojson-
 # Beberapa nama provinsi di data sumber kadang berbeda penulisan dengan nama resmi di peta
 PROV_NAME_ALIAS = {
     "DI Yogyakarta": "Daerah Istimewa Yogyakarta",
+    "D.I. Yogyakarta": "Daerah Istimewa Yogyakarta",
+    "DI. Yogyakarta": "Daerah Istimewa Yogyakarta",
     "DIY": "Daerah Istimewa Yogyakarta",
     "Yogyakarta": "Daerah Istimewa Yogyakarta",
     "Jakarta": "DKI Jakarta",
     "DKI": "DKI Jakarta",
     "Bangka Belitung": "Kepulauan Bangka Belitung",
     "Kep. Bangka Belitung": "Kepulauan Bangka Belitung",
+    "Kep Bangka Belitung": "Kepulauan Bangka Belitung",
+    "Babel": "Kepulauan Bangka Belitung",
     "Kepri": "Kepulauan Riau",
     "Kep. Riau": "Kepulauan Riau",
+    "Kep Riau": "Kepulauan Riau",
 }
 
-def to_geo_name(nama_provinsi: str) -> str:
-    return PROV_NAME_ALIAS.get(nama_provinsi, nama_provinsi)
+def _normalize_name(s: str) -> str:
+    s = str(s).strip().lower()
+    s = s.replace(".", "")
+    s = re.sub(r"\s+", " ", s)
+    return s
 
 @st.cache_data(show_spinner=False)
 def load_geojson():
@@ -224,7 +234,29 @@ except Exception:
     geojson_provinsi = None
     geojson_ok = False
 
-df["Provinsi_Geo"] = df["Provinsi"].apply(to_geo_name)
+if geojson_ok:
+    _geo_props_names = [f["properties"]["PROVINSI"] for f in geojson_provinsi["features"]]
+    _geo_norm_lookup = {_normalize_name(n): n for n in _geo_props_names}
+    _alias_norm_lookup = {_normalize_name(k): v for k, v in PROV_NAME_ALIAS.items()}
+
+    def to_geo_name(nama_provinsi: str) -> str:
+        norm = _normalize_name(nama_provinsi)
+        # 1. Coba alias manual dulu (kasus khusus yang sudah diketahui), sudah dinormalisasi juga
+        if norm in _alias_norm_lookup:
+            return _alias_norm_lookup[norm]
+        # 2. Coba cocokkan setelah dinormalisasi (huruf besar/kecil, spasi, titik)
+        if norm in _geo_norm_lookup:
+            return _geo_norm_lookup[norm]
+        # 3. Coba cocokkan mirip, standar ketat supaya tidak salah nyantol ke provinsi lain
+        mirip = get_close_matches(norm, _geo_norm_lookup.keys(), n=1, cutoff=0.87)
+        if mirip:
+            return _geo_norm_lookup[mirip[0]]
+        # 4. Tidak ketemu sama sekali -> biarkan apa adanya, akan dilaporkan sebagai tidak cocok
+        return nama_provinsi
+
+    df["Provinsi_Geo"] = df["Provinsi"].apply(to_geo_name)
+else:
+    df["Provinsi_Geo"] = df["Provinsi"]
 
 def get_detailed_policy(prov, tipologi, cluster, lisa, yvi):
     if cluster == 1:
