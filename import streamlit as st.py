@@ -22,11 +22,11 @@ html, body, [class*="css"] {
 
 .stApp {
     background:
-        radial-gradient(circle at 8% 15%, rgba(37,99,235,0.14) 0%, transparent 40%),
-        radial-gradient(circle at 92% 10%, rgba(16,185,129,0.12) 0%, transparent 38%),
-        radial-gradient(circle at 15% 90%, rgba(217,119,6,0.10) 0%, transparent 35%),
-        radial-gradient(circle at 90% 85%, rgba(139,92,246,0.12) 0%, transparent 40%),
-        linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%);
+        radial-gradient(circle at 8% 15%, rgba(99,102,241,0.16) 0%, transparent 40%),
+        radial-gradient(circle at 92% 10%, rgba(244,63,94,0.10) 0%, transparent 38%),
+        radial-gradient(circle at 15% 90%, rgba(245,158,11,0.10) 0%, transparent 35%),
+        radial-gradient(circle at 90% 85%, rgba(139,92,246,0.16) 0%, transparent 40%),
+        linear-gradient(160deg, #faf8ff 0%, #f3f0ff 100%);
     background-attachment: fixed;
     color: #1e293b;
 }
@@ -36,8 +36,37 @@ html, body, [class*="css"] {
     border-right: 1px solid rgba(15,23,42,0.08);
 }
 
+/* Rapikan tag multiselect di sidebar agar tidak terpotong/tumpang tindih tombol X */
+[data-baseweb="tag"] {
+    max-width: 100% !important;
+    height: auto !important;
+    white-space: normal !important;
+    padding: 5px 8px !important;
+    margin: 3px 4px 3px 0 !important;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6) !important;
+    border-radius: 8px !important;
+}
+[data-baseweb="tag"] span {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    word-break: break-word;
+    line-height: 1.3 !important;
+    padding-right: 4px !important;
+}
+[data-baseweb="tag"] svg {
+    fill: #ffffff !important;
+}
+[data-baseweb="select"] > div {
+    border-radius: 10px !important;
+}
+[data-baseweb="select"]:focus-within > div {
+    border-color: #8b5cf6 !important;
+    box-shadow: 0 0 0 1px #8b5cf6 !important;
+}
+
 h1 {
-    background: linear-gradient(90deg, #1d4ed8 0%, #7c3aed 60%, #059669 100%);
+    background: linear-gradient(90deg, #4f46e5 0%, #a855f7 55%, #ec4899 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -57,7 +86,7 @@ p, span, label, .stCaption, [data-testid="stCaptionContainer"] {
 [data-testid="stMetric"] {
     background: #ffffff;
     border: 1px solid rgba(15,23,42,0.08);
-    border-left: 4px solid #2563eb;
+    border-left: 4px solid #8b5cf6;
     border-radius: 14px;
     padding: 16px 18px;
     box-shadow: 0 2px 10px rgba(15,23,42,0.06);
@@ -70,8 +99,34 @@ p, span, label, .stCaption, [data-testid="stCaptionContainer"] {
     box-shadow: 0 8px 20px rgba(15,23,42,0.10);
 }
 
+/* Warna berbeda tiap kartu KPI baris atas, sesuai makna datanya */
+.st-key-kpi_row div[data-testid="column"]:nth-of-type(1) [data-testid="stMetric"] {
+    border-left-color: #6366f1; /* indigo - cakupan wilayah */
+}
+.st-key-kpi_row div[data-testid="column"]:nth-of-type(1) [data-testid="stMetricValue"] {
+    color: #4f46e5 !important;
+}
+.st-key-kpi_row div[data-testid="column"]:nth-of-type(2) [data-testid="stMetric"] {
+    border-left-color: #a855f7; /* violet - rata-rata */
+}
+.st-key-kpi_row div[data-testid="column"]:nth-of-type(2) [data-testid="stMetricValue"] {
+    color: #9333ea !important;
+}
+.st-key-kpi_row div[data-testid="column"]:nth-of-type(3) [data-testid="stMetric"] {
+    border-left-color: #f43f5e; /* rose - kerentanan tertinggi (waspada) */
+}
+.st-key-kpi_row div[data-testid="column"]:nth-of-type(3) [data-testid="stMetricValue"] {
+    color: #e11d48 !important;
+}
+.st-key-kpi_row div[data-testid="column"]:nth-of-type(4) [data-testid="stMetric"] {
+    border-left-color: #10b981; /* emerald - kerentanan terendah (aman) */
+}
+.st-key-kpi_row div[data-testid="column"]:nth-of-type(4) [data-testid="stMetricValue"] {
+    color: #059669 !important;
+}
+
 [data-testid="stMetricValue"] {
-    color: #2563eb !important;
+    color: #7c3aed;
     font-weight: 700 !important;
     font-size: 1.35rem !important;
     white-space: normal !important;
@@ -246,11 +301,12 @@ st.caption(
 )
 st.markdown("---")
 
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("Cakupan Wilayah", f"{len(filtered_df)} / {len(df)} Provinsi")
-col2.metric("Rata-Rata YVI", f"{mean_val:.2f}")
-col3.metric("Kerentanan Tertinggi", r_nama, r_val)
-col4.metric("Kerentanan Terendah", t_nama, t_val)
+with st.container(key="kpi_row"):
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Cakupan Wilayah", f"{len(filtered_df)} / {len(df)} Provinsi")
+    col2.metric("Rata-Rata YVI", f"{mean_val:.2f}")
+    col3.metric("Kerentanan Tertinggi", r_nama, r_val)
+    col4.metric("Kerentanan Terendah", t_nama, t_val)
 
 # =============================================================================
 # 5. TAB UTAMA
