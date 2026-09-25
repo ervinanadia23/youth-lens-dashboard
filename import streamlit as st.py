@@ -882,30 +882,6 @@ with tab3:
     else:
 
         # =============================================================
-        # DEBUG GEOJSON
-        # =============================================================
-
-        st.write(
-            "Jumlah feature GeoJSON:",
-            len(geojson_provinsi["features"])
-        )
-
-        st.write(
-            "Contoh nama provinsi GeoJSON:",
-            [
-                f["properties"]["PROVINSI"]
-                for f in geojson_provinsi["features"][:5]
-            ]
-        )
-
-        st.write(
-            "Contoh nama provinsi data:",
-            filtered_df["Provinsi_Geo"]
-            .head()
-            .tolist()
-        )
-
-        # =============================================================
         # PETA
         # =============================================================
 
@@ -938,20 +914,10 @@ with tab3:
         
         st.plotly_chart(
             fig_map,
-            width="stretch"
+            width="stretch",
+            key="yvi_map"
         )
-        
-        fig_map.update_layout(
-            margin=dict(l=0, r=0, t=10, b=0),
-            coloraxis_colorbar=dict(title="Skor YVI"),
-            height=500
-        )
-        
-        st.plotly_chart(
-            fig_map,
-            width="stretch"
-        )
-
+    
         # =============================================================
         # CEK MATCHING NAMA PROVINSI
         # =============================================================
