@@ -225,12 +225,8 @@ def _normalize_name(s: str) -> str:
 
 @st.cache_data(show_spinner=False)
 def load_geojson():
-    # Prioritaskan file lokal (kalau sudah diupload ke repo) supaya tidak tergantung internet saat demo
-    if os.path.exists(GEOJSON_LOCAL_PATH):
-        with open(GEOJSON_LOCAL_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
-    with urllib.request.urlopen(GEOJSON_URL, timeout=15) as resp:
-        return json.load(resp)
+    with open(GEOJSON_LOCAL_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 try:
     geojson_provinsi = load_geojson()
