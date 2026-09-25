@@ -12,43 +12,84 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Poppins', sans-serif;
+}
+
 .stApp {
-    background: #f8fafc;
+    background:
+        radial-gradient(circle at 8% 15%, rgba(37,99,235,0.14) 0%, transparent 40%),
+        radial-gradient(circle at 92% 10%, rgba(16,185,129,0.12) 0%, transparent 38%),
+        radial-gradient(circle at 15% 90%, rgba(217,119,6,0.10) 0%, transparent 35%),
+        radial-gradient(circle at 90% 85%, rgba(139,92,246,0.12) 0%, transparent 40%),
+        linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%);
+    background-attachment: fixed;
     color: #1e293b;
 }
+
 [data-testid="stSidebar"] {
     background-color: #ffffff;
     border-right: 1px solid rgba(15,23,42,0.08);
 }
-h1, h2, h3, h4, h5 {
-    color: #0f172a !important;
+
+h1 {
+    background: linear-gradient(90deg, #1d4ed8 0%, #7c3aed 60%, #059669 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800 !important;
+    letter-spacing: -0.5px;
 }
+
+h2, h3, h4, h5 {
+    color: #0f172a !important;
+    font-weight: 600 !important;
+}
+
 p, span, label, .stCaption, [data-testid="stCaptionContainer"] {
     color: #475569;
 }
+
 [data-testid="stMetric"] {
     background: #ffffff;
     border: 1px solid rgba(15,23,42,0.08);
+    border-left: 4px solid #2563eb;
     border-radius: 14px;
     padding: 16px 18px;
     box-shadow: 0 2px 10px rgba(15,23,42,0.06);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+
+[data-testid="stMetric"]:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(15,23,42,0.10);
+}
+
 [data-testid="stMetricValue"] {
     color: #2563eb !important;
+    font-weight: 700 !important;
 }
+
 [data-testid="stMetricLabel"] {
     color: #64748b !important;
 }
+
 [data-testid="stContainer"], div[data-testid="stVerticalBlockBorderWrapper"] {
     background: #ffffff;
     border: 1px solid rgba(15,23,42,0.06);
     border-radius: 14px;
     box-shadow: 0 2px 10px rgba(15,23,42,0.05);
 }
+
 [data-testid="stDataFrame"] {
     background: #ffffff;
     border-radius: 10px;
 }
+
 hr {
     border-color: rgba(15,23,42,0.1);
 }
