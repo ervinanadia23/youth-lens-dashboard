@@ -1,0 +1,368 @@
+import os
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+
+# =============================================================================
+# 1. KONFIGURASI HALAMAN & TEMA EDITORIAL MODERN (LIGHT MODE)
+# =============================================================================
+st.set_page_config(
+    page_title="Youth Vulnerability Index Dashboard",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+st.markdown("""
+<style>
+.stApp {
+    background: #f8fafc;
+    color: #1e293b;
+}
+[data-testid="stSidebar"] {
+    background-color: #ffffff;
+    border-right: 1px solid rgba(15,23,42,0.08);
+}
+h1, h2, h3, h4, h5 {
+    color: #0f172a !important;
+}
+p, span, label, .stCaption, [data-testid="stCaptionContainer"] {
+    color: #475569;
+}
+[data-testid="stMetric"] {
+    background: #ffffff;
+    border: 1px solid rgba(15,23,42,0.08);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 2px 10px rgba(15,23,42,0.06);
+}
+[data-testid="stMetricValue"] {
+    color: #2563eb !important;
+}
+[data-testid="stMetricLabel"] {
+    color: #64748b !important;
+}
+[data-testid="stContainer"], div[data-testid="stVerticalBlockBorderWrapper"] {
+    background: #ffffff;
+    border: 1px solid rgba(15,23,42,0.06);
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(15,23,42,0.05);
+}
+[data-testid="stDataFrame"] {
+    background: #ffffff;
+    border-radius: 10px;
+}
+hr {
+    border-color: rgba(15,23,42,0.1);
+}
+</style>
+""", unsafe_allow_html=True)
+
+PLOT_FONT_COLOR = "#1e293b"
+PLOT_GRID_COLOR = "rgba(15,23,42,0.12)"
+
+# =============================================================================
+# 2. LOAD DATA DARI EXCEL & GENERASI KEBIJAKAN SPESIFIK
+# =============================================================================
+@st.cache_data
+def load_data():
+    file_path = r"C:\Users\firda\Downloads\YOUTH-LENS_hasil_akhir.xlsx"
+    if not os.path.exists(file_path):
+        file_path = "YOUTH-LENS_hasil_akhir.xlsx"
+    df_raw = pd.read_excel(file_path)
+    return df_raw
+
+try:
+    df = load_data()
+except Exception as e:
+    st.error(f"Gagal membaca file data: {e}")
+    st.stop()
+
+def get_detailed_policy(prov, tipologi, cluster, lisa, yvi):
+    if cluster == 1:
+        return (
+            "1. Intervensi Afirmatif Terpadu: Program wajib belajar berbasis beasiswa penuh dan asrama bagi pemuda pedalaman.\n"
+            "2. Akselerasi Infrastruktur Digital: Pembangunan BTS 4G USO dan penyediaan ruang belajar digital komunitas gratis.\n"
+            "3. Penanganan Lintas Batas (Hotspot Spasial): Kolaborasi antardaerah di kawasan Papua untuk penyetaraan rasio guru dan tenaga pelatih vokasi vokasional."
+        )
+    elif cluster == 3:
+        if "High-High" in str(lisa):
+            return (
+                "1. Program Transisi Pendidikan-Pekerjaan: Pembentukan Balai Latihan Kerja (BLK) Maritim dan Komoditas Lokal terpadu antardaerah tetangga.\n"
+                "2. Program Padat Karya Muda: Insentif proyek infrastruktur daerah yang memprioritaskan tenaga kerja pemuda lokal usia 16-24 tahun.\n"
+                "3. Subsidi Akses Permodalan Wirausaha: Skema kredit pemuda mikro tanpa agunan untuk menekan angka NEET di zona hotspot rentan."
+            )
+        elif "Low-High" in str(lisa):
+            return (
+                "1. Fasilitas Pusat Logistik Ketenagakerjaan: Memanfaatkan posisi strategis daerah sebagai penghubung pusat pertumbuhan ekonomi kawasan sekitar.\n"
+                "2. Program Link and Match Industri Khusus: Kerjasama vokasi dengan industri pengolahan/jasa untuk menyerap pemuda terdidik.\n"
+                "3. Buffer Kebijakan Spasial: Mencegah limpasan pengangguran musiman dari daerah hotspot tetangga melalui registrasi ketenagakerjaan digital."
+            )
+        elif "Low-Low" in str(lisa):
+            return (
+                "1. Upskilling Berbasis Teknologi Maju: Pelatihan vokasi industri manufaktur berteknologi tinggi, otomasi, dan ekonomi digital.\n"
+                "2. Insentif Retensi Tenaga Kerja Formal: Pengurangan pajak daerah bagi industri yang merekrut pemuda fresh graduate dengan status kontrak formal berkelanjutan.\n"
+                "3. Inkubator Bisnis Kreatif Pemuda: Penguatan ekosistem startup dan sertifikasi keahlian terstandarisasi nasional."
+            )
+        else:
+            return (
+                "1. Revitalisasi Sekolah Menengah Kejuruan (SMK): Penyelarasan kurikulum kejuruan dengan kebutuhan riil pasar kerja lokal.\n"
+                "2. Perluasan Program Magang Bersertifikat: Kolaborasi dinas ketenagakerjaan daerah dan sektor swasta lokal dengan subsidi uang saku.\n"
+                "3. Sentra Kewirausahaan Pemuda: Pendampingan mentoring bisnis dan digital marketing bagi pelaku usaha muda sektor jasa/ritel."
+            )
+    elif cluster == 2:
+        return (
+            "1. Replikasi Praktik Baik (Knowledge Sharing): Menjadi pusat transfer inovasi tata kelola kepemudaan bagi provinsi-provinsi di sekitarnya.\n"
+            "2. Penguatan Karier Berkelanjutan: Program beasiswa riset, kepemimpinan pemuda tingkat lanjut, dan pengembangan talenta global.\n"
+            "3. Pemeliharaan Ketahanan Sosioekonomi: Pengawasan terhadap potensi disparitas pendapatan perkotaan agar pemuda rentan marjinal tetap terproteksi."
+        )
+    else:
+        if "Low-Low" in str(lisa):
+            return (
+                "1. Penguatan Ekosistem Inovasi & Pendidikan Tinggi: Optimalisasi iklim belajar dan budaya untuk mendorong daya saing pemuda ke level nasional.\n"
+                "2. Perlindungan Pekerja Lepas (Gig Economy): Skema jaminan sosial ketenagakerjaan bagi pemuda yang bekerja di sektor kreatif dan pariwisata.\n"
+                "3. Pencegahan Underemployment: Fasilitasi penempatan kerja yang sesuai dengan tingkat kualifikasi pendidikan."
+            )
+        else:
+            return (
+                "1. Intervensi Multisektoral Seimbang: Penataan kebijakan terkoordinasi antara dinas pendidikan, kesehatan, dan tenaga kerja tanpa dominasi sektor tunggal.\n"
+                "2. Sistem Monitoring Berkala (Early Warning): Pemantauan indikator kerentanan pemuda per semester guna mengantisipasi pergeseran menuju klaster berisiko.\n"
+                "3. Program Pembinaan Komunitas Pemuda: Penguatan peran organisasi karang taruna dan forum kepemudaan dalam pemberdayaan ekonomi desa."
+            )
+
+df["Rekomendasi_Spesifik"] = df.apply(
+    lambda r: get_detailed_policy(r["Provinsi"], r["Tipologi"], r["Cluster"], r["LISA_quadrant"], r["YVI"]),
+    axis=1
+)
+
+# =============================================================================
+# 3. SIDEBAR & FILTER
+# =============================================================================
+with st.sidebar:
+    st.markdown("### Filter Analisis")
+    st.caption("Youth Vulnerability Index (YVI) & Spatial Clustering")
+    st.markdown("---")
+
+    all_prov = ["Semua Provinsi"] + sorted(df["Provinsi"].tolist())
+    selected_prov = st.selectbox("Wilayah Spesifik:", all_prov)
+
+    tipologi_list = df["Tipologi"].unique().tolist()
+    selected_tipologi = st.multiselect(
+        "Tipologi Klaster:",
+        options=tipologi_list,
+        default=tipologi_list
+    )
+
+    lisa_list = df["LISA_quadrant"].unique().tolist()
+    selected_lisa = st.multiselect(
+        "Kuadran LISA:",
+        options=lisa_list,
+        default=lisa_list
+    )
+
+filtered_df = df[
+    (df["Tipologi"].isin(selected_tipologi)) &
+    (df["LISA_quadrant"].isin(selected_lisa))
+]
+
+if selected_prov != "Semua Provinsi":
+    filtered_df = filtered_df[filtered_df["Provinsi"] == selected_prov]
+
+# =============================================================================
+# 4. HEADER UTAMA & KPI METRIK
+# =============================================================================
+mean_val = filtered_df['YVI'].mean() if not filtered_df.empty else 0
+rentan = filtered_df.sort_values(by="YVI", ascending=False).iloc[0] if not filtered_df.empty else None
+tangguh = filtered_df.sort_values(by="YVI", ascending=True).iloc[0] if not filtered_df.empty else None
+
+r_nama = rentan['Provinsi'] if rentan is not None else "-"
+r_val = f"YVI: {rentan['YVI']:.1f}" if rentan is not None else "-"
+
+t_nama = tangguh['Provinsi'] if tangguh is not None else "-"
+t_val = f"YVI: {tangguh['YVI']:.1f}" if tangguh is not None else "-"
+
+st.title("Dashboard Analisis Youth Vulnerability Index (YVI)")
+st.caption(
+    "Pemantauan disparitas kerentanan pemuda antardaerah di Indonesia berbasis indeks komposit, "
+    "reduksi dimensi (PCA), klasterisasi K-Means, dan autokorelasi spasial (LISA)."
+)
+st.markdown("---")
+
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("Cakupan Wilayah", f"{len(filtered_df)} / {len(df)} Provinsi")
+col2.metric("Rata-Rata YVI", f"{mean_val:.2f}")
+col3.metric("Kerentanan Tertinggi", r_nama, r_val)
+col4.metric("Kerentanan Terendah", t_nama, t_val)
+
+# =============================================================================
+# 5. TAB UTAMA
+# =============================================================================
+tab1, tab2, tab3 = st.tabs([
+    "Peringkat & Disparitas YVI",
+    "Tipologi Klaster (K-Means)",
+    "Pola Spasial & Rekomendasi Kebijakan"
+])
+
+color_map = {
+    "Digitally Excluded & Education Deprived": "#b91c1c",
+    "Employment Insecure": "#d97706",
+    "Moderate / No Dominant Domain": "#2563eb",
+    "Relatively Resilient": "#059669"
+}
+
+# --- TAB 1: PERINGKAT YVI ---
+with tab1:
+    st.subheader("Distribusi Peringkat Youth Vulnerability Index")
+    st.caption("Peringkat kerentanan komposit dari tingkat tertinggi (paling rentan) hingga terendah.")
+
+    if filtered_df.empty:
+        st.warning("Tidak ada provinsi yang memenuhi kriteria filter.")
+    else:
+        df_rank = filtered_df.sort_values(by="YVI", ascending=True)
+        fig_bar = px.bar(
+            df_rank,
+            x="YVI",
+            y="Provinsi",
+            orientation="h",
+            color="YVI",
+            color_continuous_scale="Tealgrn",
+            hover_data={"Tipologi": True, "LISA_quadrant": True, "YVI": ":.2f"},
+            height=max(500, len(df_rank) * 22)
+        )
+        fig_bar.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color=PLOT_FONT_COLOR),
+            xaxis=dict(showgrid=True, gridcolor=PLOT_GRID_COLOR, title="Skor Indeks (0 = Tangguh, 100 = Paling Rentan)"),
+            yaxis=dict(title=""),
+            coloraxis_colorbar=dict(title="Skor YVI"),
+            margin=dict(l=10, r=10, t=20, b=10)
+        )
+        st.plotly_chart(fig_bar, width="stretch")
+
+    st.info(
+        "Kawasan Papua menunjukkan rentang disparitas yang signifikan: Papua Pegunungan (100.0), "
+        "Papua Tengah (83.9), dan Papua Selatan (69.1) menempati kelompok indeks tertinggi, sedangkan "
+        "Papua (38.9) dan Papua Barat Daya (30.7) mencatatkan skor yang jauh lebih rendah. "
+        "Hal ini memperlihatkan bahwa kedekatan geografis tidak otomatis menghasilkan tingkat kerentanan yang homogen."
+    )
+
+# --- TAB 2: TIPOLOGI KLASTER ---
+with tab2:
+    st.subheader("Tipologi Kerentanan Pemuda Berdasarkan Klasterisasi K-Means")
+    st.caption("Pengelompokan 38 provinsi berdasarkan skor 3 komponen utama PCA (Silhouette Score: 0,376).")
+
+    col_pie, col_box = st.columns([5, 5])
+
+    with col_pie:
+        tip_count = filtered_df["Tipologi"].value_counts().reset_index()
+        tip_count.columns = ["Tipologi", "Jumlah"]
+
+        fig_pie = px.pie(
+            tip_count,
+            names="Tipologi",
+            values="Jumlah",
+            hole=0.5,
+            color="Tipologi",
+            color_discrete_map=color_map,
+            title="Proporsi Jumlah Provinsi per Tipologi"
+        )
+        fig_pie.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color=PLOT_FONT_COLOR),
+            margin=dict(t=40, b=10, l=10, r=10)
+        )
+        fig_pie.update_traces(textposition='inside', textinfo='percent+value')
+        st.plotly_chart(fig_pie, width="stretch")
+
+    with col_box:
+        fig_box = px.box(
+            filtered_df,
+            x="Tipologi",
+            y="YVI",
+            color="Tipologi",
+            points="all",
+            hover_name="Provinsi",
+            color_discrete_map=color_map,
+            title="Sebaran Skor YVI per Tipologi"
+        )
+        fig_box.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color=PLOT_FONT_COLOR),
+            yaxis=dict(showgrid=True, gridcolor=PLOT_GRID_COLOR, title="Skor YVI"),
+            xaxis=dict(title=""),
+            showlegend=False,
+            margin=dict(t=40, b=10, l=10, r=10)
+        )
+        st.plotly_chart(fig_box, width="stretch")
+
+    st.write("##### Ringkasan Statistik Tipologi")
+    summary_tabel = filtered_df.groupby("Tipologi").agg(
+        Jumlah_Provinsi=("Provinsi", "count"),
+        Rata_Rata_YVI=("YVI", "mean"),
+        Min_YVI=("YVI", "min"),
+        Max_YVI=("YVI", "max")
+    ).reset_index()
+    summary_tabel["Rata_Rata_YVI"] = summary_tabel["Rata_Rata_YVI"].round(2)
+    st.dataframe(summary_tabel, width="stretch")
+
+# --- TAB 3: SPASIAL LISA & KEBIJAKAN ---
+with tab3:
+    st.subheader("Autokorelasi Spasial Lokal (LISA) & Arah Intervensi Kebijakan")
+    st.caption("Identifikasi aglomerasi spasial untuk memetakan penularan kerentanan antardaerah.")
+
+    col_lisa_chart, col_lisa_text = st.columns([5, 5])
+
+    with col_lisa_chart:
+        lisa_count = filtered_df["LISA_quadrant"].value_counts().reset_index()
+        lisa_count.columns = ["Status LISA", "Jumlah"]
+
+        fig_lisa = px.bar(
+            lisa_count,
+            x="Status LISA",
+            y="Jumlah",
+            color="Status LISA",
+            color_discrete_map={
+                "High-High (hotspot rentan)": "#b91c1c",
+                "Low-Low (coldspot/aman)": "#059669",
+                "Low-High": "#ea580c",
+                "Tidak signifikan": "#94a3b8"
+            }
+        )
+        fig_lisa.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color=PLOT_FONT_COLOR),
+            yaxis=dict(showgrid=True, gridcolor=PLOT_GRID_COLOR, title="Jumlah Provinsi"),
+            xaxis=dict(title=""),
+            showlegend=False,
+            margin=dict(t=10, b=10, l=10, r=10)
+        )
+        st.plotly_chart(fig_lisa, width="stretch")
+
+    with col_lisa_text:
+        st.markdown("""
+        **Pola Hubungan Antarwilayah:**
+        * **High-High (Hotspot Rentan):** Terpusat di wilayah Papua Pegunungan, Papua Tengah, Papua Selatan, Papua, dan Maluku. Pola ini mengindikasikan adanya perangkap kerentanan spasial (*spatial poverty trap*) yang memerlukan intervensi terpadu lintas perbatasan.
+        * **Low-Low (Coldspot Aman):** Terkonsentrasi di Pulau Jawa-Bali (DI Yogyakarta, Bali, Jawa Barat, Jawa Tengah, Jawa Timur).
+        * **Low-High (Spatial Outlier):** Teridentifikasi pada **Papua Barat Daya**, yaitu wilayah dengan tingkat kerentanan relatif lebih rendah di tengah kawasan hotspot rentan.
+        * **Tidak Signifikan:** Mencakup mayoritas provinsi (27 dari 38), yang berarti tingkat kerentanan pemuda di wilayah tersebut tidak menunjukkan pola asosiasi spasial yang cukup kuat dengan provinsi tetangganya, baik ke arah rentan maupun tangguh.
+        """)
+
+    st.markdown("---")
+    st.subheader("Tinjauan Kebijakan Intervensi per Provinsi")
+
+    target_prov = st.selectbox("Pilih Provinsi Sasaran:", sorted(df["Provinsi"].unique()))
+    row = df[df["Provinsi"] == target_prov].iloc[0]
+
+    with st.container(border=True):
+        st.markdown(f"#### Provinsi: {row['Provinsi']}")
+        st.caption(f"Tipologi: **{row['Tipologi']}** | Status Spasial: **{row['LISA_quadrant']}**")
+
+        col_m1, col_m2, col_m3 = st.columns(3)
+        col_m1.metric("Skor YVI", f"{row['YVI']:.2f}")
+        col_m2.metric("Klaster K-Means", f"Cluster {row['Cluster']}")
+        col_m3.metric("Kuadran LISA", f"{row['LISA_quadrant']}")
+
+        st.markdown("**Program Intervensi Terarah (Action Plan):**")
+        st.info(row["Rekomendasi_Spesifik"])
