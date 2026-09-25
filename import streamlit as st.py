@@ -867,7 +867,7 @@ with tab3:
     )
 
     st.markdown(
-        "##### Peta Sebaran Youth Vulnerability Index (YVI) Antarprovinsi"
+        "##### Peta Sebaran Tipologi K-Means Youth Vulnerability Antarprovinsi"
     )
 
 
